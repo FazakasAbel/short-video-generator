@@ -3,3 +3,5 @@ openai
 opencv-python
 moviepy
 Pillow
+Flask
+uvicorn[standard]
