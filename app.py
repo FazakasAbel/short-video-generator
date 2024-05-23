@@ -2,6 +2,7 @@ from settings import OPENAI_API_KEY, MONGO_URI
 from flask import Flask, request, jsonify
 from scripts.script_generator import YouTubeScriptGenerator
 from pymongo import MongoClient
+from bson import ObjectId
 import os
 
 app = Flask(__name__)
@@ -23,18 +24,46 @@ def generate_script():
     
     script = generator.get_script(theme)
     if script:
-        scripts_collection.insert_one({"theme": theme, "script": script})
-        return jsonify(script)
+        inserted_script = scripts_collection.insert_one({"theme": theme, "script": script})
+        return jsonify(inserted_script), 200
     else:
         return jsonify({"error": "Failed to generate script"}), 500    
 
-@app.route('/script/<script_id>', methods=['GET'])    
+@app.route('/script/<script_id>', methods=['GET'])
+def get_script(script_id):
+    assert script_id == request.view_args['script_id']
+    try:
+        script_id = ObjectId(script_id)
+    except:
+        return jsonify({"error": "Invalid script ID format"}), 400
+    
+    script = scripts_collection.find_one({"_id": script_id})
+    script['_id'] = str(script['_id']) 
+    if script:
+        return jsonify(script), 200
+    else:
+        return jsonify({"error": "Failed to find script"}), 404    
+
+@app.route('/script/<script_id>', methods=['PUT'])
 def update_script(script_id):
     assert script_id == request.view_args['script_id']
-    data = request.json
-    script = data.get('script')
-    print(script_id + " ---- " + script)
-    return {}, 200
+    try:
+        script_id = ObjectId(script_id)
+    except:
+        return jsonify({"error": "Invalid script ID format"}), 400
+
+    script = scripts_collection.find_one({"_id": script_id})
+    if script:
+        new_script = request.json.get('script')
+        if new_script:
+            scripts_collection.update_one({"_id": script_id}, {"$set": {"script": new_script}})
+            updated_script = scripts_collection.find_one({"_id": script_id})
+            updated_script['_id'] = str(updated_script['_id']) 
+            return jsonify(updated_script), 200
+        else:
+            return jsonify({"error": "Content is required in the request body"}), 400
+    else:
+        return jsonify({"error": "Failed to find script"}), 404
 
 @app.route('/slideshow/<script_id>', methods=['GET'])
 def get_slideshow(script_id):
