@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.12-slim
+FROM python:latest
 
 # Set the working directory in the container
 WORKDIR /app
@@ -20,7 +20,9 @@ COPY .env .env
 ENV FLASK_ENV=development
 
 # Set the environment variable to tell Flask which file is the entry point of the application
-ENV FLASK_APP=app.py
+ENV FLASK_APP=src/app.py
+
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app"
 
 # Expose the port that the app runs on
 EXPOSE 5000
