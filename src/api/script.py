@@ -1,83 +1,82 @@
-# api/scripts.py
+
+# api/script.py
 from flask import Blueprint, request, jsonify
-from pymongo import MongoClient
-from bson import ObjectId
-from settings import MONGO_URI, OPENAI_API_KEY
-from scripts.script_generator import YouTubeScriptGenerator
-import os
+from service.script_service import ScriptService
+from src.api.exceptions.DocumentNotFound import DocumentNotFound
+from src.api.exceptions.NoUpdateDone import NoUpdateDone    
+from bson.objectid import ObjectId
+from src.model.script import Script
+from src.model.scene import Scene
+import logging
 
 scripts_bp = Blueprint('script', __name__)
+script_service = ScriptService()
 
-# Replace with your actual OpenAI API key
-generator = YouTubeScriptGenerator(OPENAI_API_KEY)
-
-# Connect to MongoDB
-client = MongoClient(MONGO_URI)
-db = client.shortsdb
-scripts_collection = db.scripts
-
-@scripts_bp.route('/script/generate', methods=['POST'])
+@scripts_bp.route('/script', methods=['POST'])
 def generate_script():
-    theme = request.args.get('theme')
-    if not theme:
-        return jsonify({"error": "Theme is required"}), 400
-    
-    script = generator.get_script(theme)
-    if script:
-        inserted_script = scripts_collection.insert_one({"theme": theme, "script": script})
-        inserted_script = {
-            "_id": str(inserted_script.inserted_id),
-            "theme": theme,
-            "script": script
-        } 
-        return jsonify(inserted_script), 200
-    else:
-        return jsonify({"error": "Failed to generate script"}), 500    
+    try:
+        theme = request.args.get('theme')
+
+        if not theme:
+            return jsonify({"error": "Theme and script are required"}), 400
+
+
+        scene_list : list[Scene] = script_service.generate_script(theme)
+        if scene_list:
+            script_id = script_service.save_script(Script(theme=theme, script=scene_list))
+            return jsonify(script_id), 201
+        return jsonify({"error": "Failed to generate script"}), 500
+
+    except Exception as e:
+        logging.exception(f"Failed to create script: {str(e)}")
+        return jsonify({"error": "Failed to create script"}), 500
+
 
 @scripts_bp.route('/script/<script_id>', methods=['GET'])
 def get_script(script_id):
     try:
         script_id = ObjectId(script_id)
-    except:
-        return jsonify({"error": "Invalid script ID format"}), 400
-    
-    script = scripts_collection.find_one({"_id": script_id})
-    if script:
-        script['_id'] = str(script['_id']) 
-        return jsonify(script), 200
-    else:
-        return jsonify({"error": "Failed to find script"}), 404    
+        script = script_service.get_script(script_id)
+        return script.to_json(), 200
+
+    except DocumentNotFound as e:
+        return jsonify({"error": "Script not found"}), 404
+
+    except Exception as e:
+        logging.exception(f"Failed to get script: {str(e)}")
+        return jsonify({"error": "Failed to get script"}), 500
+
 
 @scripts_bp.route('/script/<script_id>', methods=['PUT'])
 def update_script(script_id):
     try:
         script_id = ObjectId(script_id)
-    except:
-        return jsonify({"error": "Invalid script ID format"}), 400
+        data = request.json
+        script = Script.from_json(data)
 
-    script = scripts_collection.find_one({"_id": script_id})
-    if script:
-        new_script = request.json.get('script')
-        if new_script:
-            scripts_collection.update_one({"_id": script_id}, {"$set": {"script": new_script}})
-            updated_script = scripts_collection.find_one({"_id": script_id})
-            updated_script['_id'] = str(updated_script['_id']) 
-            return jsonify(updated_script), 200
-        else:
-            return jsonify({"error": "Content is required in the request body"}), 400
-    else:
-        return jsonify({"error": "Failed to find script"}), 404
+        updated_script = script
+        script_service.update_script(script_id, updated_script)
+        return {}, 204
+
+    except DocumentNotFound as e:
+        return jsonify({"error": "Script not found"}), 404
+
+    except Exception as e:
+        logging.exception(f"Failed to update script: {str(e)}")
+        return jsonify({"error": "Failed to update script"}), 500
+
 
 @scripts_bp.route('/script/<script_id>', methods=['DELETE'])
 def delete_script(script_id):
     try:
         script_id = ObjectId(script_id)
-    except:
-        return jsonify({"error": "Invalid script ID format"}), 400
-
-    script = scripts_collection.find_one({"_id": script_id})
-    if script:
-        scripts_collection.delete_one({"_id": script_id})
+        script_service.delete_script(script_id)
         return {}, 204
-    else:
-        return jsonify({"error": "Failed to find script"}), 404
+
+    except DocumentNotFound as e:
+        return jsonify({"error": "Script not found"}), 404
+
+    except Exception as e:
+        logging.exception(f"Failed to delete script: {str(e)}")
+        return jsonify({"error": "Failed to delete script"}), 500
+
