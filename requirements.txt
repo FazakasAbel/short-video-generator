@@ -1,8 +1,10 @@
 python-dotenv
 openai
-opencv-python
+opencv-python-headless
 moviepy
 Pillow
 Flask
 pymongo
+jsonpickle
 uvicorn[standard]
+numpy
