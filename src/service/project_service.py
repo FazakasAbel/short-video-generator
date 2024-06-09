@@ -45,6 +45,7 @@ class ProjectService:
         return updated_project
 
     def delete_project(self, project_id):
+        #TODO - refactor delete methods to use deleted_count 
         project = self.repo.get_project(project_id)
         if not project:
             raise DocumentNotFound
