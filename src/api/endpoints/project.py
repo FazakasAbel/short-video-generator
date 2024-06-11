@@ -70,11 +70,12 @@ def update_project(project_id):
         title = data.get('title')
         script_id = data.get('script_id')
         images = data.get('images')
-        audio_id = data.get('audio_id')
+        audio_id = data.get('music_id')
         render_id = data.get('render_id')
         state = data.get('state')
+        voiceovers = data.get('voiceovers')
         
-        if not title and not script_id and not images and not audio_id and not render_id and not state:
+        if not title and not script_id and not images and not audio_id and not render_id and not state and not voiceovers:
             return jsonify({"error": "Title, script id, images, audio id, render id or state are required"}), 400
         
         update_project = Project(title=title, script_id=script_id, images=images, audio_id=audio_id, render_id=render_id, state=state)
@@ -140,7 +141,7 @@ def generate_project_script(project_id):
     try:
         project_id = ObjectId(project_id)
         script_id = project_service.generate_script(project_id, theme)
-        return jsonify(script_id), 204
+        return jsonify(script_id), 200
     except GenerationUnsuccessful as e:
         return jsonify({"error": e.message}), 404    
     except DocumentNotFound as e:
@@ -156,7 +157,7 @@ def generate_project_slideshow(project_id):
     try:
         project_id = ObjectId(project_id)
         render_id = project_service.generate_project_slideshow(project_id)
-        return jsonify(render_id), 204
+        return jsonify(render_id), 200
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:
@@ -164,3 +165,31 @@ def generate_project_slideshow(project_id):
     except Exception as e:
         logging.exception(f"Failed to update project: {str(e)}")
         return jsonify({"error": "Failed to update project"}), 500
+    
+@projects_bp.route('/project/<project_id>/generate/voiceovers', methods=['POST'])
+def generate_project_voiceovers(project_id):
+    try:
+        project_id = ObjectId(project_id)
+        voiceover_ids = project_service.generate_project_voiceovers(project_id)
+        return jsonify(voiceover_ids), 200
+    except DocumentNotFound as e:
+        return jsonify({"error": e.message}), 404
+    except NoUpdateDone:
+        return jsonify({"error": "No update done"}), 409
+    except Exception as e:
+        logging.exception(f"Failed to update project: {str(e)}")
+        return jsonify({"error": "Failed to update project"}), 500
+    
+@projects_bp.route('/project/<project_id>/generate/narration', methods=['POST'])   
+def generate_project_narration(project_id):
+    try:
+        project_id = ObjectId(project_id)
+        render_id = project_service.generate_project_narration(project_id)
+        return jsonify(render_id), 200
+    except DocumentNotFound as e:
+        return jsonify({"error": e.message}), 404
+    except NoUpdateDone:
+        return jsonify({"error": "No update done"}), 409
+    except Exception as e:
+        logging.exception(f"Failed to update project: {str(e)}")
+        return jsonify({"error": "Failed to update project"}), 500 

@@ -1,4 +1,4 @@
-from src.api import user, script, audio, project, render, image
+from src.api.endpoints import user, script, audio, project, render, image
 from flask import Flask
 import os
 

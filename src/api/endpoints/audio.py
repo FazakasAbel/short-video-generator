@@ -1,6 +1,6 @@
 # api/audio.py
 from flask import Blueprint, request, jsonify, send_file
-from service.audio_service import audioService
+from src.service.audio_service import AudioService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone    
 from bson.objectid import ObjectId
@@ -9,7 +9,7 @@ import logging
 
 audios_bp = Blueprint('audio', __name__)
 
-audio_service = audioService()
+audio_service = AudioService()
 
 @audios_bp.route('/audio', methods=['POST'])
 def save_audio():
