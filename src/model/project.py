@@ -1,5 +1,5 @@
 class Project:
-    def __init__(self, id=None, user_id=None, title=None, script_id=None, images=None, audio_id=None, render_id=None, state=None):
+    def __init__(self, id=None, user_id=None, title=None, script_id=None, images=None, audio_id=None, render_id=None, state=None, voiceovers=None):
         self.id = id
         self.user_id = user_id
         self.title = title
@@ -8,6 +8,7 @@ class Project:
         self.audio_id = audio_id
         self.render_id = render_id
         self.state = state
+        self.voiceovers = voiceovers or []
 
     def to_json(self, include_id=True):
         result = {
@@ -15,9 +16,10 @@ class Project:
             'title': self.title,
             'script_id': self.script_id,
             'images': self.images,
-            'audio_id': self.audio_id,
+            'music_id': self.audio_id,
             'render_id': self.render_id,
-            'state': self.state
+            'state': self.state,
+            'voiceovers': self.voiceovers
         }
         if include_id:
             result['id'] = self.id
@@ -31,10 +33,11 @@ class Project:
                 self.images == other.images and
                 self.audio_id == other.audio_id and
                 self.render_id == other.render_id and
-                self.state == other.state)
+                self.state == other.state and
+                self.voiceovers == other.voiceovers)
 
     def merge_projects(self, new_project):
-        merged_project = Project(id=self.id, user_id=self.user_id, title=self.title, script_id=self.script_id, images=self.images, audio_id=self.audio_id, render_id=self.render_id, state=self.state)
+        merged_project = Project(id=self.id, user_id=self.user_id, title=self.title, script_id=self.script_id, images=self.images, audio_id=self.audio_id, render_id=self.render_id, state=self.state, voiceovers=self.voiceovers)
         if new_project.title:
             merged_project.title = new_project.title
 
@@ -54,3 +57,15 @@ class Project:
             merged_project.state = new_project.state    
 
         return merged_project
+    
+    @staticmethod
+    def from_json(data):
+        return Project(id=str(data.get("_id")), 
+                       user_id=data.get("user_id"), 
+                       title=data.get("title"), 
+                       script_id=data.get("script_id") if "script_id" in data else None, 
+                       images=data.get("images") if "images" in data else [], 
+                       audio_id=data.get("music_id") if "music_id" in data else None, 
+                       render_id=data.get("render_id") if "render_id" in data else None, 
+                       state=data.get("state"),
+                       voiceovers=data.get("voiceovers") if "voiceovers" in data else [])
