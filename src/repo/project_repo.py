@@ -21,14 +21,7 @@ class ProjectRepository:
         data = self.projects_collection.find_one({"_id": ObjectId(project_id)})
         if not data:
             return None
-        project = Project(id=str(data["_id"]), 
-                          user_id=data["user_id"], 
-                          title=data["title"], 
-                          script_id=data["script_id"], 
-                          images=data["images"], 
-                          audio_id=data["audio_id"], 
-                          render_id=data["render_id"], 
-                          state=data["state"])
+        project = Project.from_json(data)
         return project
 
     def update_project(self, project_id, updated_data):
@@ -42,7 +35,7 @@ class ProjectRepository:
         data = self.projects_collection.find({"user_id": str(user_id)})
         projects = []
         for project_data in data:
-            project = Project(str(project_data["_id"]), project_data["user_id"], project_data["title"], project_data["script_id"], project_data["images"], project_data["audio_id"], project_data["render_id"], project_data["state"])
+            project = Project.from_json(project_data)
             projects.append(project)
         return [project.to_json() for project in projects]
     
@@ -56,5 +49,8 @@ class ProjectRepository:
         self.projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"state": state}})
 
     def update_project_render(self, project_id, render_id):
-        self.projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"render_id": render_id}})    
+        self.projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"render_id": render_id}})   
+
+    def update_project_voiceovers(self, project_id, audio_ids):
+        self.projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"voiceovers": audio_ids}})     
 
