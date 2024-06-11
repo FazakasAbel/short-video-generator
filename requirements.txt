@@ -8,3 +8,4 @@ pymongo
 jsonpickle
 uvicorn[standard]
 numpy
+secrets-toolbelt
