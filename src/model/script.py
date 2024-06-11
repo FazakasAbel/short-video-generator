@@ -39,3 +39,9 @@ class Script:
     @staticmethod
     def from_json(data):
         return Script(id=str(data['_id']), theme=data['theme'], script=[Scene.from_json(scene) for scene in data['script']])
+
+    def get_text_descriptions(self):
+        return [scene.text for scene in self.script]
+    
+    def get_voiceover_durations(self):
+        return map(lambda scene: sum(map(lambda image_description: image_description.duration, scene.images)), self.script)
