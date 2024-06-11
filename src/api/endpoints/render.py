@@ -1,6 +1,6 @@
 # api/render.py
 from flask import Blueprint, request, jsonify, send_file
-from service.render_service import RenderService
+from src.service.render.render_service import RenderService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone
 from bson.objectid import ObjectId

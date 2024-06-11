@@ -1,6 +1,6 @@
 # api/image.py
 from flask import Blueprint, jsonify, request
-from src.service.image_service import ImageService
+from src.service.image.image_service import ImageService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from bson.objectid import ObjectId
 from src.model.image_url import ImageUrl

@@ -3,7 +3,7 @@ from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone 
 from src.model.script import Script
 import logging
-from src.service.script_generator import YouTubeScriptGenerator 
+from src.service.script.script_generator import YouTubeScriptGenerator 
 
 
 class ScriptService:

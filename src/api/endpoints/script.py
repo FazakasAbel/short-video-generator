@@ -1,7 +1,7 @@
 
 # api/script.py
 from flask import Blueprint, request, jsonify
-from service.script_service import ScriptService
+from src.service.script.script_service import ScriptService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone    
 from bson.objectid import ObjectId

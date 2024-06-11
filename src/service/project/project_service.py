@@ -3,14 +3,14 @@ from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone 
 from src.api.exceptions.GenerationUnsuccessful import GenerationUnsuccessful
 from src.model.image_description import ImageDescription
-from src.service.image_service import ImageService
-from src.service.script_service import ScriptService
+from src.service.image.image_service import ImageService
+from src.service.script.script_service import ScriptService
 from src.model.script import Script
 from src.model.project import Project
 from src.model.image_url import ImageUrl
-from src.service.movie_service import MovieService
-from src.service.render_service import RenderService
-from src.service.audio_service import AudioService
+from service.render.movie_service import MovieService
+from service.render.render_service import RenderService
+from src.service.audio.audio_service import AudioService
 from io import BytesIO
 import logging
 

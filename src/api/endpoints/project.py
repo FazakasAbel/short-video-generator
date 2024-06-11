@@ -1,7 +1,7 @@
 # api/project.py
 from flask import Blueprint, request, jsonify
-from src.service.project_service import ProjectService
-from src.service.script_service import ScriptService
+from src.service.project.project_service import ProjectService
+from src.service.script.script_service import ScriptService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.GenerationUnsuccessful import GenerationUnsuccessful
 from src.api.exceptions.NoUpdateDone import NoUpdateDone    

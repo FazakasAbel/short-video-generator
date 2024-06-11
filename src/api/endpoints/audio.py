@@ -1,6 +1,6 @@
 # api/audio.py
 from flask import Blueprint, request, jsonify, send_file
-from src.service.audio_service import AudioService
+from src.service.audio.audio_service import AudioService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone    
 from bson.objectid import ObjectId

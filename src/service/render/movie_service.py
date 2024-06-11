@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from tqdm import tqdm
 import cv2 as cv2
 from moviepy.editor import ImageSequenceClip, AudioFileClip, VideoFileClip, CompositeAudioClip
-from src.service.image_service import ImageService
+from src.service.image.image_service import ImageService
 from src.model.image_url import ImageUrl
 from src.model.audio import Audio
 from src.model.render import Render
