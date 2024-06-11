@@ -1,4 +1,4 @@
-class audio:
+class Audio:
     def __init__(self, id=None, file=None, filename=None):
         self.id = id
         self.file = file
@@ -18,7 +18,7 @@ class audio:
                 self.filename == other.filename)
     
     def merge_audios(self, new_audio):
-        merged_audio = audio(self.file, self.filename)
+        merged_audio = Audio(self.id, self.file, self.filename)
         if new_audio.filename:
             merged_audio.filename = new_audio.filename
 
