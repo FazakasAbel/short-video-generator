@@ -2,9 +2,9 @@ import gridfs
 from bson import ObjectId
 from pymongo import MongoClient
 from settings import MONGO_URI
-from src.model.audio import audio
+from src.model.audio import Audio
 
-class audioRepository:
+class AudioRepository:
     def __init__(self):
         self.client = MongoClient(MONGO_URI)
         self.db = self.client.shortsdb
@@ -20,7 +20,7 @@ class audioRepository:
             if not data:
                 return None
             
-            audio = audio(str(data._id), data, data.filename)
+            audio = Audio(str(data._id), data, data.filename)
             return audio
         except gridfs.errors.NoFile:
             return None
