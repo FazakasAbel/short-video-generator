@@ -193,3 +193,18 @@ def generate_project_narration(project_id):
     except Exception as e:
         logging.exception(f"Failed to update project: {str(e)}")
         return jsonify({"error": "Failed to update project"}), 500 
+    
+
+@projects_bp.route('/project/<project_id>/generate/subtitles', methods=['POST'])
+def generate_project_subtitles(project_id):
+    try:
+        project_id = ObjectId(project_id)
+        render_id = project_service.generate_project_subtitles(project_id)
+        return jsonify(render_id), 200
+    except DocumentNotFound as e:
+        return jsonify({"error": e.message}), 404
+    except NoUpdateDone:
+        return jsonify({"error": "No update done"}), 409
+    except Exception as e:
+        logging.exception(f"Failed to update project: {str(e)}")
+        return jsonify({"error": "Failed to update project"}), 500    
