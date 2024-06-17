@@ -3,7 +3,7 @@ import os
 import logging as log
 from src.model.image_url import ImageUrl
 from src.repo.image_repo import ImageUrlRepository
-from src.service.dalle_service import DalleService
+from src.service.image.dalle_service import DalleService
 from src.api.exceptions.GenerationUnsuccessful import GenerationUnsuccessful
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone

@@ -1,6 +1,6 @@
 # api/users.py
 from flask import Blueprint, request, jsonify
-from service.user_service import UserService
+from service.user.user_service import UserService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.api.exceptions.NoUpdateDone import NoUpdateDone    
 from bson.objectid import ObjectId

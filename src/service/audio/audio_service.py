@@ -1,7 +1,7 @@
 from src.repo.audio_repo import AudioRepository
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from src.model.audio import Audio
-from src.service.tts_audio_service import TTSAudioService
+from src.service.audio.tts_audio_service import TTSAudioService
 from src.api.exceptions.GenerationUnsuccessful import GenerationUnsuccessful
 import logging
 
