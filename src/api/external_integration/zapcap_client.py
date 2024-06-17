@@ -9,12 +9,10 @@ class ZapCapClient:
         self.conn = http.client.HTTPSConnection(ZAP_CAP_URI)
         self.api_key = ZAP_CAP_API_KEY
 
-    def upload_video(self, file_path):
-        with open(file_path, "rb") as file:
-            mp4_file = file.read()
+    def upload_video(self, file):
 
         encoder = MultipartEncoder(
-            fields={"video": ("video.mp4", mp4_file, "video/mp4")}
+            fields={"video": ("video.mp4", file.read(), "video/mp4")}
         )
 
         headers = {
@@ -38,11 +36,15 @@ class ZapCapClient:
         res = self.conn.getresponse()
         return res.read()
 
-    def create_video_task(self, video_id: str, template_id: str, auto_approve: bool, transcript_task_id: bool,
-                          language: str, render_options: RenderOptions):
+    def create_video_task(self, video_id: str, 
+                          template_id: str, 
+                          auto_approve: bool, 
+                          language: str, 
+                          render_options: RenderOptions):
         payload = {
             "templateId": template_id,
             "autoApprove": auto_approve,
+            #TODO add transcript_task_id
             "language": language,
             "renderOptions": render_options.to_json()
         }
@@ -57,7 +59,7 @@ class ZapCapClient:
         res = self.conn.getresponse()
         return res.read()
 
-    def get_task(self, video_id, task_id):
+    def get_video_task(self, video_id, task_id):
         headers = {
             'X-Api-Key': self.api_key
         }
