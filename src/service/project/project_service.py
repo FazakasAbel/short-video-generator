@@ -11,8 +11,12 @@ from src.model.image_url import ImageUrl
 from service.render.movie_service import MovieService
 from service.render.render_service import RenderService
 from src.service.audio.audio_service import AudioService
+from src.service.render.zap_cap_service import ZapCapService
+from src.model.render_options import RenderOptions
 from io import BytesIO
+import time
 import logging
+import json
 
 class ProjectService:
     def __init__(self):
@@ -22,6 +26,7 @@ class ProjectService:
         self.movie_service = MovieService(30, (1024, 1792), 2)
         self.render_service = RenderService()
         self.audio_service = AudioService()
+        self.zap_cap_service = ZapCapService()
 
     def save_project(self, user_id, title,  state, script_id=None, images=None, audio_id=None, render_id=None):
         project = Project(user_id=user_id, title=title, script_id=script_id, images=images, audio_id=audio_id, render_id=render_id, state=state)
@@ -208,6 +213,59 @@ class ProjectService:
             raise GenerationUnsuccessful("Failed to generate narration")
 
         render_id = self.render_service.save_render(narration, f"{project.id}_narration.mp4")
+        if not render_id:
+            raise GenerationUnsuccessful("Failed to save render")
+
+        self.update_project_render(project_id, render_id)
+        return render_id
+    
+    def generate_project_subtitles(self, project_id): 
+
+        project = self.repo.get_project(project_id)
+        if not project:
+            raise DocumentNotFound("Project not found")
+
+        render = self.render_service.get_render(project.render_id)   
+        if not render:
+            raise DocumentNotFound("Render not found")
+
+        video_upload_res = self.zap_cap_service.upload_video(render.file)
+        if not video_upload_res:
+            raise GenerationUnsuccessful("Failed to upload video")
+
+        video_id = json.loads(video_upload_res)["id"]
+        if not video_id:
+            raise GenerationUnsuccessful("Failed to get video id")
+        logging.exception(video_id)
+
+        template_id = "cfa6a20f-cacc-4fb6-b1d0-464a81fed6cf"
+        create_task_res = self.zap_cap_service.create_video_task(video_id, template_id=template_id, auto_approve=True, language="en", render_options=RenderOptions())
+        
+        if not create_task_res:
+            raise GenerationUnsuccessful("Failed to create video task")
+
+        task_id = json.loads(create_task_res)["taskId"]
+        if not task_id:
+            raise GenerationUnsuccessful("Failed to get task id")
+        logging.exception(task_id)
+        url=None
+        done_try = 0
+        max_try = 6
+        while url==None and done_try<=max_try:
+            get_task_res = self.zap_cap_service.get_video_task(video_id, task_id)
+            if not get_task_res:
+                raise GenerationUnsuccessful("Failed to get video task")
+            done_try += 1
+            url = json.loads(get_task_res)["downloadUrl"]
+            logging.exception("going to sleep for 20s")
+            time.sleep(20)
+
+        #    if not url:
+        #        raise GenerationUnsuccessful("Failed to get url")
+        logging.exception(url)
+
+        video = self.render_service.download_video(url)
+        render_id = self.render_service.save_render(video, f"{project.title}_with_subtitles.mp4")
         if not render_id:
             raise GenerationUnsuccessful("Failed to save render")
 
