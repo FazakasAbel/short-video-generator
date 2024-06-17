@@ -9,7 +9,7 @@ class TTSAudioService:
         self.client = OpenAI(api_key=OPENAI_API_KEY)
 
     def generate_audio(self, text):
-        response = self.client.audio.speech.with_streaming_response.create(
+        response = self.client.audio.speech.create(
           model="tts-1",
           voice="alloy",
           input=text
