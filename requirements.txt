@@ -7,5 +7,5 @@ Flask
 pymongo
 jsonpickle
 uvicorn[standard]
-numpy
-secrets-toolbelt
+numpy==1.26.4
+requests-toolbelt
