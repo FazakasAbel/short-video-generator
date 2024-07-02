@@ -7,6 +7,9 @@ venv/
 # C extensions
 *.so
 
+# playground
+playground.py
+
 # Distribution / packaging
 bin/
 build/
