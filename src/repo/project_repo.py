@@ -12,17 +12,21 @@ class ProjectRepository:
         self.db = self.client.shortsdb
         self.projects_collection = self.db.projects
 
-    def save_project(self, project):
+    def save_project(self, project : Project) -> str:
         project_data = project.to_json(include_id=False)
         result = self.projects_collection.insert_one(project_data)
         return str(result.inserted_id)
 
-    def get_project(self, project_id):
+    def get_project(self, project_id : str) -> Project:
         data = self.projects_collection.find_one({"_id": ObjectId(project_id)})
         if not data:
             return None
         project = Project.from_json(data)
         return project
+    
+    def get_projects(self) -> list[Project]:
+        data = self.projects_collection.find()
+        return [Project.from_json(project_data) for project_data in data]
 
     def update_project(self, project_id, updated_data):
         updated_data_json = updated_data.to_json(include_id=False)
@@ -31,13 +35,9 @@ class ProjectRepository:
     def delete_project(self, project_id):
         self.projects_collection.delete_one({"_id": ObjectId(project_id)})
 
-    def get_projects_by_user_id(self, user_id):
+    def get_projects_by_user_id(self, user_id) -> list[Project]:
         data = self.projects_collection.find({"user_id": str(user_id)})
-        projects = []
-        for project_data in data:
-            project = Project.from_json(project_data)
-            projects.append(project)
-        return [project.to_json() for project in projects]
+        return [Project.from_json(project_data) for project_data in data]
     
     def update_project_images(self, project_id, image_ids):
         self.projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"images": image_ids}})
