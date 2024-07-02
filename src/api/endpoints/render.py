@@ -21,7 +21,7 @@ def save_render():
             return jsonify({"error": "No selected file"}), 400
 
         render_id = render_service.save_render(file, file.filename)
-        return jsonify(render_id), 201
+        return jsonify({"id": f"{render_id}"}), 201 # return jsonify(render_id), 201
 
     except Exception as e:
         logging.exception(f"Failed to save render: {str(e)}")

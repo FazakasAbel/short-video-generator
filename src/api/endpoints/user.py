@@ -22,7 +22,7 @@ def save_user():
             return jsonify({"error": "Username and email are required"}), 400
         
         user_id = user_service.save_user(username, email)
-        return jsonify(user_id), 201
+        return jsonify({"id": f"{user_id}"}), 201 # return jsonify(user_id), 201
     except Exception as e:
         logging.exception(f"Failed to create user: {str(e)}")
         return jsonify({"error": "Failed to create user"}), 500

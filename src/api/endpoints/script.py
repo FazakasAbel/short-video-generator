@@ -24,7 +24,7 @@ def generate_script():
         scene_list : list[Scene] = script_service.generate_script(theme)
         if scene_list:
             script_id = script_service.save_script(Script(theme=theme, script=scene_list))
-            return jsonify(script_id), 201
+            return jsonify({"id": f"{script_id}"}), 201 # return jsonify(script_id), 201
         return jsonify({"error": "Failed to generate script"}), 500
 
     except Exception as e:

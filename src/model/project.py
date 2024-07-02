@@ -1,14 +1,14 @@
 class Project:
     def __init__(self, id=None, user_id=None, title=None, script_id=None, images=None, audio_id=None, render_id=None, state=None, voiceovers=None):
-        self.id = id
-        self.user_id = user_id
-        self.title = title
-        self.script_id = script_id
-        self.images = images or []
-        self.audio_id = audio_id
-        self.render_id = render_id
-        self.state = state
-        self.voiceovers = voiceovers or []
+        self.id : str = id
+        self.user_id : str = user_id
+        self.title : str  = title
+        self.script_id : str = script_id
+        self.images : list[str] = images or []
+        self.audio_id : str = audio_id
+        self.render_id : str = render_id
+        self.state : str = state
+        self.voiceovers : list[str] = voiceovers or []
 
     def to_json(self, include_id=True):
         result = {
@@ -25,7 +25,7 @@ class Project:
             result['id'] = self.id
         return result
 
-    def equals(self, other):
+    def equals(self, other : 'Project') -> bool:
         return (self.id == other.id and
                 self.user_id == other.user_id and
                 self.title == other.title and
@@ -36,7 +36,7 @@ class Project:
                 self.state == other.state and
                 self.voiceovers == other.voiceovers)
 
-    def merge_projects(self, new_project):
+    def merge_projects(self, new_project : 'Project') -> 'Project':
         merged_project = Project(id=self.id, user_id=self.user_id, title=self.title, script_id=self.script_id, images=self.images, audio_id=self.audio_id, render_id=self.render_id, state=self.state, voiceovers=self.voiceovers)
         if new_project.title:
             merged_project.title = new_project.title
@@ -59,7 +59,7 @@ class Project:
         return merged_project
     
     @staticmethod
-    def from_json(data):
+    def from_json(data) -> 'Project':
         return Project(id=str(data.get("_id")), 
                        user_id=data.get("user_id"), 
                        title=data.get("title"), 

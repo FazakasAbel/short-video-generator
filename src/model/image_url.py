@@ -1,14 +1,15 @@
+from io import BytesIO
 
-class ImageUrl:
+class Image:
 
-    def __init__(self, id=None, url=None, duration=None):
-        self.id = id
-        self.url = url
-        self.duration = duration
+    def __init__(self, id : str =None, file : BytesIO =None, duration : int =None):
+        self.id : str = id
+        self.file : BytesIO = file
+        self.duration : int = duration
 
-    def to_json(self, include_id=True):
+    def to_json(self, include_id : bool =True):
         result = {
-            'url': self.url,
+            'file': self.file.getvalue(),
             'duration': self.duration
         }
         if include_id:
@@ -16,21 +17,21 @@ class ImageUrl:
         return result
     
     @staticmethod
-    def from_json(data):
-        return ImageUrl(id=str(data['_id']), url=data['url'], duration=data['duration'])
+    def from_json(data) -> 'Image':
+        return Image(id=str(data['_id']), file=BytesIO(data['file']), duration=data['duration'])
     
-    def equals(self, other):
-        return (self.url == other.url and
+    def equals(self, other : 'Image'):
+        return (self.file == other.file and
                 self.duration == other.duration)
     
-    def merge_image_url(self, new_image_url):
-        merged_image_url = ImageUrl(id=self.id, url=self.url, duration=self.duration)
+    def merge_image_url(self, new_image : 'Image') -> 'Image':
+        merged_image = Image(id=self.id, file=self.file, duration=self.duration)
 
-        if new_image_url.duration:
-            merged_image_url.duration = new_image_url.duration
+        if new_image.duration:
+            merged_image.duration = new_image.duration
 
-        if new_image_url.url:
-            merged_image_url.url = new_image_url.url
+        if new_image.file:
+            merged_image.file = new_image.file
 
-        return merged_image_url
+        return merged_image
     
