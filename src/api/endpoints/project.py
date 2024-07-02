@@ -13,6 +13,16 @@ projects_bp = Blueprint('project', __name__)
 
 project_service = ProjectService()
 
+@projects_bp.route('/project', methods=['GET'])
+def get_projects():
+    try:
+        projects = project_service.get_projects()
+        return jsonify([project.to_json() for project in projects]), 200
+    except DocumentNotFound as e:
+        return jsonify({"error": "Projects not found"}), 404
+    except Exception as e:
+        logging.exception(f"Failed to get projects: {str(e)}")
+        return jsonify({"error": "Failed to get projects"}), 500
 
 @projects_bp.route('/project', methods=['POST'])
 def save_project():
@@ -26,7 +36,7 @@ def save_project():
             return jsonify({"error": "Theme, title, state and user_id are required"}), 400
         
         project_id = project_service.save_project(title=title, user_id=user_id, state=state)
-        return jsonify(project_id), 201
+        return jsonify({"id": f"{project_id}"}), 201
     except Exception as e:
         logging.exception(f"Failed to create project: {str(e)}")
         return jsonify({"error": "Failed to create project"}), 500
@@ -97,7 +107,7 @@ def get_projects_by_user_id(user_id):
     try:
         user_id = ObjectId(user_id)
         projects = project_service.get_projects_by_user_id(user_id)
-        return jsonify(projects), 200
+        return jsonify([project.to_json() for project in projects]), 200
     except Exception as e:
         logging.exception(f"Failed to update project: {str(e)}")
         return jsonify({"error": "Failed to update project"}), 500    
@@ -123,7 +133,7 @@ def generate_project_images(project_id):
     try:
         project_id = ObjectId(project_id)
         image_ids = project_service.generate_images(project_id)
-        return jsonify(image_ids), 204
+        return jsonify({"ids": f"{image_ids}"}), 200 # return jsonify(image_ids), 204
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:
@@ -141,7 +151,7 @@ def generate_project_script(project_id):
     try:
         project_id = ObjectId(project_id)
         script_id = project_service.generate_script(project_id, theme)
-        return jsonify(script_id), 200
+        return jsonify({"id": f"{script_id}"}), 200 # return jsonify(script_id), 200
     except GenerationUnsuccessful as e:
         return jsonify({"error": e.message}), 404    
     except DocumentNotFound as e:
@@ -157,7 +167,7 @@ def generate_project_slideshow(project_id):
     try:
         project_id = ObjectId(project_id)
         render_id = project_service.generate_project_slideshow(project_id)
-        return jsonify(render_id), 200
+        return jsonify({"id": f"{render_id}"}), 200 # return jsonify(render_id), 200
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:
@@ -171,7 +181,7 @@ def generate_project_voiceovers(project_id):
     try:
         project_id = ObjectId(project_id)
         voiceover_ids = project_service.generate_project_voiceovers(project_id)
-        return jsonify(voiceover_ids), 200
+        return jsonify({"ids": f"{voiceover_ids}"}), 200 # return jsonify(voiceover_ids), 200
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:
@@ -185,7 +195,7 @@ def generate_project_narration(project_id):
     try:
         project_id = ObjectId(project_id)
         render_id = project_service.generate_project_narration(project_id)
-        return jsonify(render_id), 200
+        return jsonify({"id": f"{render_id}"}), 200 # return jsonify(render_id), 200
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:
@@ -200,7 +210,7 @@ def generate_project_subtitles(project_id):
     try:
         project_id = ObjectId(project_id)
         render_id = project_service.generate_project_subtitles(project_id)
-        return jsonify(render_id), 200
+        return jsonify({"id": f"{render_id}"}), 200 # return jsonify(render_id), 200
     except DocumentNotFound as e:
         return jsonify({"error": e.message}), 404
     except NoUpdateDone:

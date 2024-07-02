@@ -7,7 +7,7 @@ from src.service.image.image_service import ImageService
 from src.service.script.script_service import ScriptService
 from src.model.script import Script
 from src.model.project import Project
-from src.model.image_url import ImageUrl
+from src.model.image_url import Image
 from service.render.movie_service import MovieService
 from service.render.render_service import RenderService
 from src.service.audio.audio_service import AudioService
@@ -31,6 +31,13 @@ class ProjectService:
     def save_project(self, user_id, title,  state, script_id=None, images=None, audio_id=None, render_id=None):
         project = Project(user_id=user_id, title=title, script_id=script_id, images=images, audio_id=audio_id, render_id=render_id, state=state)
         return self.repo.save_project(project)
+
+    def get_projects(self) -> list[Project]:
+        projects = self.repo.get_projects()
+        if not projects:
+            raise DocumentNotFound
+
+        return projects
 
     def get_project(self, project_id):
         project = self.repo.get_project(project_id)
@@ -79,7 +86,7 @@ class ProjectService:
 
         return updated_project
     
-    def generate_images(self, project_id):
+    def generate_images(self, project_id) -> list[str]:
         project : Project = self.repo.get_project(project_id)
         if not project:
             raise DocumentNotFound("Project not found")
@@ -95,10 +102,10 @@ class ProjectService:
         image_descriptions : list[ImageDescription] = script.get_image_descriptions()
 
         #TODO use zip
-        images_urls = [ImageUrl(url=self.image_service.generate_dalle_image_url(image_description.description), duration=image_description.duration) for image_description in image_descriptions]
-        image_ids = []
-        for image_url in images_urls:
-            image_id = self.image_service.save_image_url(image_url.url, image_url.duration)
+        images = [Image(file=self.image_service.generate_dalle_image(image_description.description), duration=image_description.duration) for image_description in image_descriptions]
+        image_ids : list[str] = []
+        for image in images:
+            image_id = self.image_service.save_image(image.file, image.duration)
             if not image_id:
                 raise GenerationUnsuccessful("Failed to save image")
             image_ids.append(image_id)
@@ -137,11 +144,11 @@ class ProjectService:
         if not image_ids or len(image_ids) == 0:
             raise DocumentNotFound(f"Images missing in project {project_id}")
         
-        image_urls = [self.image_service.get_image_url(image_id) for image_id in image_ids]
-        if not image_urls or len(image_urls) == 0:
+        image = [self.image_service.get_image(image_id) for image_id in image_ids]
+        if not image or len(image) == 0:
             raise DocumentNotFound("Images not found")
         
-        slideshow = self.movie_service.generate_slideshow(image_urls)
+        slideshow = self.movie_service.generate_slideshow(image)
         if not slideshow:
             raise GenerationUnsuccessful("Failed to generate slideshow")
 
