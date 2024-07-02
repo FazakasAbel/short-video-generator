@@ -1,9 +1,9 @@
 # api/image.py
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, make_response
 from src.service.image.image_service import ImageService
 from src.api.exceptions.DocumentNotFound import DocumentNotFound
 from bson.objectid import ObjectId
-from src.model.image_url import ImageUrl
+from src.model.image_url import Image
 import logging
 
 images_bp = Blueprint('image', __name__)
@@ -19,7 +19,7 @@ def save_image():
         if not url or not duration:
             return jsonify({'error': 'URL and duration are required'}), 400
 
-        image_id = image_service.save_image_url(url, duration)
+        image_id = image_service.save_image(url, duration)
         return jsonify(image_id), 201
 
     except Exception as e:
@@ -28,11 +28,15 @@ def save_image():
 
 
 @images_bp.route('/image/<image_id>', methods=['GET'])
-def get_image_url(image_id):
+def get_image(image_id : str):
     try:
         image_id = ObjectId(image_id)
-        image_url = image_service.get_image_url(image_id)
-        return image_url.to_json(), 200
+        image = image_service.get_image(image_id)
+        content = image.file
+        content.seek(0)
+        response = make_response(send_file(content, mimetype='image/jpeg', as_attachment=True, download_name=f'image_{image_id}.jpg'))
+        response.headers['duration'] = image.duration
+        return response, 200
     except DocumentNotFound as e:
         return jsonify({'error': 'Image not found'}), 404
 
