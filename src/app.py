@@ -1,5 +1,6 @@
 from src.api.endpoints import user, script, audio, project, render, image
 from flask import Flask
+from flask_cors import CORS
 import os
 
 def create_app():
@@ -12,6 +13,7 @@ def create_app():
     app.register_blueprint(audio.audios_bp)
     app.register_blueprint(project.projects_bp)
     app.register_blueprint(image.images_bp)
+    CORS(app)
     return app
 
 app = create_app()
