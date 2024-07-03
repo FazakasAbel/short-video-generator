@@ -1,7 +1,7 @@
 name: Build and Push Docker Image
 
-on:
-  push:
+on: 
+  merge:
     branches:
       - main
 
@@ -21,6 +21,16 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Create .env file
+      run: |
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "VOICE_ID=${{ secrets.VOICE_ID }}" >> .env
+        echo "ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}" >> .env
+        echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+        echo "ZAP_CAP_API_KEY=${{ secrets.ZAP_CAP_API_KEY }}" >> .env
+        echo "ZAP_CAP_URI=${{ secrets.ZAP_CAP_URI }}" >> .env
+        # Add other secrets here as needed
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
