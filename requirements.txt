@@ -1,0 +1,12 @@
+python-dotenv
+openai
+opencv-python-headless
+moviepy
+Pillow
+Flask
+pymongo
+jsonpickle
+uvicorn[standard]
+numpy==1.26.4
+requests-toolbelt
+flask-cors
