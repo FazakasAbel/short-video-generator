@@ -26,32 +26,24 @@ jobs:
       - name: Determine semantic version
         id: version
         run: |
-          # Extract the latest tag, or set an initial version if no tags are found
+            # Extract the latest tag, or set an initial version if no tags are found
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
           
-          VERSION=${LATEST_TAG#v}
-    
-          # Extract major, minor, and patch components
-          MAJOR=$(echo "$VERSION" | cut -d. -f1)
-          MINOR=$(echo "$VERSION" | cut -d. -f2)
-          PATCH=$(echo "$VERSION" | cut -d. -f3)
-
           # Get the latest commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
           
           # Determine the new version based on the commit message
           if [[ $COMMIT_MSG =~ "MAJOR" ]]; then
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
+            CHANGE_LEVEL = "major"
           elif [[ $COMMIT_MSG =~ "MINOR" ]]; then
-            MINOR=$((MINOR + 1))
-            PATCH=0
+            CHANGE_LEVEL = "minor"
           else
-            PATCH=$((PATCH + 1))
+            CHANGE_LEVEL = "patch"
           fi
-          
-          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+
+          # Create the new version
+          NEW_VERSION = semver -i ${{CHANGE_LEVEL}}
+
           echo "New version is $NEW_VERSION"
           echo "::set-output name=new_version::$NEW_VERSION"
 
