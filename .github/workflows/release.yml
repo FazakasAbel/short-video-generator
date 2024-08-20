@@ -29,11 +29,12 @@ jobs:
           # Extract the latest tag, or set an initial version if no tags are found
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
           
+          VERSION=${LATEST_TAG#v}
+    
           # Extract major, minor, and patch components
-          IFS='.' read -r -a VERSION_PARTS <<< "${LATEST_TAG#v}"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
 
           # Get the latest commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
