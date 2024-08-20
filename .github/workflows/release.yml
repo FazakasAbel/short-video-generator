@@ -16,7 +16,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 0.0.0 # Optional fallback tag to use when no tag can be found
+         
       - name: Set up Git for tagging
         run: |
           git config --global user.name "FazakasAbel"
@@ -26,12 +33,12 @@ jobs:
       - name: Install semver
         run: |
           npm install -g semver
-
+      
       - name: Determine semantic version
         id: version
         run: |
           # Extract the latest tag, or set an initial version if no tags are found
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
+          LATEST_TAG=${{ steps.previoustag.outputs.tag }}
           
           # Get the latest commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
