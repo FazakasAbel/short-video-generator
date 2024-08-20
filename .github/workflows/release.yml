@@ -1,0 +1,68 @@
+# .github/workflows/release.yml
+name: Automatic Versioning and Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write  # This gives the GITHUB_TOKEN permission to push tags and releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Git for tagging
+        run: |
+          git config --global user.name "FazakasAbel"
+          git config --global user.email "fazakas.abel@gmail.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+      - name: Determine semantic version
+        id: version
+        run: |
+          # Extract the latest tag, or set an initial version if no tags are found
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
+          
+          # Extract major, minor, and patch components
+          IFS='.' read -r -a VERSION_PARTS <<< "${LATEST_TAG#v}"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+
+          # Get the latest commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          
+          # Determine the new version based on the commit message
+          if [[ $COMMIT_MSG =~ "MAJOR" ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ $COMMIT_MSG =~ "MINOR" ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version is $NEW_VERSION"
+          echo "::set-output name=new_version::$NEW_VERSION"
+
+      - name: Create Git tag
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          git tag $NEW_VERSION
+          git push origin $NEW_VERSION
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
