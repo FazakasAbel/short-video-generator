@@ -23,30 +23,30 @@ jobs:
           git config --global user.email "fazakas.abel@gmail.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
+      - name: Install semver
+        run: |
+          npm install -g semver
+
       - name: Determine semantic version
         id: version
         run: |
-            # Extract the latest tag, or set an initial version if no tags are found
+          # Extract the latest tag, or set an initial version if no tags are found
           LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "v0.0.0")
           
           # Get the latest commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          CHANGE_LEVEL = "patch"
+          CHANGE_LEVEL="patch"
           # Determine the new version based on the commit message
           if [[ $COMMIT_MSG =~ "MAJOR" ]]; then
-            CHANGE_LEVEL = "major"
+            CHANGE_LEVEL="major"
           elif [[ $COMMIT_MSG =~ "MINOR" ]]; then
-            CHANGE_LEVEL = "minor"
-          else
-            CHANGE_LEVEL = "patch"
+            CHANGE_LEVEL="minor"
           fi
 
           # Create the new version
-          NEW_VERSION = semver -i ${{CHANGE_LEVEL}}
-
+          NEW_VERSION=$(semver -i ${CHANGE_LEVEL} ${LATEST_TAG})
           echo "New version is $NEW_VERSION"
           echo "::set-output name=new_version::$NEW_VERSION"
-
       - name: Create Git tag
         run: |
           NEW_VERSION=${{ steps.version.outputs.new_version }}
