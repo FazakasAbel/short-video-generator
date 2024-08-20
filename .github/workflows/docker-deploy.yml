@@ -29,6 +29,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/web-app:${{ github.event.inputs.version_tag }}"
+          DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/flask-app:${{ github.event.inputs.version_tag }}"
           docker build -t $DOCKER_IMAGE .
           docker push $DOCKER_IMAGE
