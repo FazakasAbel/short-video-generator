@@ -1,41 +1,34 @@
 name: Build and Push Docker Image
 
-on: 
-  push:
-    branches:
-      - main
-
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'The semantic version tag to build the Docker image from'
+        required: true
+        default: 'latest'
+        
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.version_tag }}
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Create .env file
-      run: |
-        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-        echo "VOICE_ID=${{ secrets.VOICE_ID }}" >> .env
-        echo "ELEVENLABS_API_KEY=${{ secrets.ELEVENLABS_API_KEY }}" >> .env
-        echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
-        echo "ZAP_CAP_API_KEY=${{ secrets.ZAP_CAP_API_KEY }}" >> .env
-        echo "ZAP_CAP_URI=${{ secrets.ZAP_CAP_URI }}" >> .env
-        # Add other secrets here as needed
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/my-flask-app:latest
+      - name: Build and push Docker image
+        run: |
+          DOCKER_IMAGE="${{ secrets.DOCKER_USERNAME }}/web-app:${{ github.event.inputs.version_tag }}"
+          docker build -t $DOCKER_IMAGE .
+          docker push $DOCKER_IMAGE
