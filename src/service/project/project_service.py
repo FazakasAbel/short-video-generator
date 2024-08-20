@@ -71,7 +71,6 @@ class ProjectService:
         projects = self.repo.get_projects_by_user_id(user_id)
         return projects    
     
-
     def update_project_state(self, project_id, state):
         project = self.repo.get_project(project_id)
         if not project:
