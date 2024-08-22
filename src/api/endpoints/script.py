@@ -12,7 +12,7 @@ import logging
 scripts_bp = Blueprint('script', __name__)
 script_service = ScriptService()
 
-@scripts_bp.route('/script', methods=['POST'])
+@scripts_bp.route('/api/script', methods=['POST'])
 def generate_script():
     try:
         theme = request.args.get('theme')
@@ -32,7 +32,7 @@ def generate_script():
         return jsonify({"error": "Failed to create script"}), 500
 
 
-@scripts_bp.route('/script/<script_id>', methods=['GET'])
+@scripts_bp.route('/api/script/<script_id>', methods=['GET'])
 def get_script(script_id):
     try:
         script_id = ObjectId(script_id)
