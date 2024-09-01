@@ -1,5 +1,4 @@
-# Use the official Python image from the Docker Hub
-FROM python:latest
+FROM python:latest AS build
 
 # Set the working directory in the container
 WORKDIR /app
@@ -13,16 +12,21 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container at /app
 COPY . .
 
+FROM python:slim AS production
+
+# Set the working directory in the container
+WORKDIR /app
+
 # Copy the .env file into the container
-COPY .env .env
+COPY --from=build /app/.env .env
 
-# Set the environment variable to tell Flask to run in the development environment
+# Copy the installed dependencies and application code from the build stage
+COPY --from=build /app /app
+
+# Set environment variables
 ENV FLASK_ENV=development
-
-# Set the environment variable to tell Flask which file is the entry point of the application
 ENV FLASK_APP=src/app.py
-
-ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app"
+ENV PYTHONPATH="${PYTHONPATH}:/usr/src/app"
 
 # Expose the port that the app runs on
 EXPOSE 5000
