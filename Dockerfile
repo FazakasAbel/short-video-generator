@@ -13,9 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container at /app
 COPY . .
 
-# Copy the .env file into the container
-COPY .env .env
-
 # Set the environment variable to tell Flask to run in the development environment
 ENV FLASK_ENV=development
 
